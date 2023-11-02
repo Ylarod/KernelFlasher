@@ -55,7 +55,11 @@ class MainViewModel(
 
     init {
         PartitionUtil.init(context, fileSystemManager)
-        val partitionName = if (fileSystemManager.getFile("/dev/block/by-name/init_boot_a").exists()) "init_boot" else "boot"
+        var partitionName = if (fileSystemManager.getFile("/dev/block/by-name/init_boot_a").exists()) "init_boot" else "boot"
+        val isMagisk = Shell.cmd("which magisk").exec().isSuccess
+        if (!isMagisk){
+            partitionName = "boot"
+        }
         val bootA = PartitionUtil.findPartitionBlockDevice(context, partitionName, "_a")!!
         val bootB = PartitionUtil.findPartitionBlockDevice(context, partitionName, "_b")!!
         kernelVersion = Shell.cmd("echo $(uname -r) $(uname -v)").exec().out[0]
